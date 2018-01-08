@@ -27,7 +27,7 @@ video.addEventListener('loadedmetadata', () => {
     }
 });
 mediaSource_1.addEventListener('sourceopen', (e) => {
-
+    console.log('sourceopen mediaSource_1');
     // mediaSource_1.duration = 0;
     buffer = mediaSource_1.addSourceBuffer('video/webm; codecs="opus, vp9"');
 
@@ -64,7 +64,7 @@ mediaSource_1.addEventListener('sourceopen', (e) => {
 
     setTimeout(function () {
 
-        start('ws://localhost:12034/?stream=live');
+        start();
     }, 1000)
 
 }, false);
@@ -77,54 +77,59 @@ var recordedBlobs = [];
 var waitStream = true;
 var play = false;
 var sourceBuffer;
+var stream_name = (new Date()).getTime();
+ws = new WebSocket('ws://localhost:12034/?stream=live&stream_name=' + stream_name);
+ws.onmessage = function (evt) {
+    if (typeof evt.data === 'string' && evt.data === 'start')
+        mediaRecorder.start(100);
+};
 
-function start(websocketServerLocation) {
-    ws = new WebSocket(websocketServerLocation);
-    ws.onmessage = function (evt) {
-        if (typeof evt.data === 'string' && evt.data === 'start')
-            mediaRecorder.start(20);
-    };
+ws.onclose = function (event) {
+    // Try to reconnect in 5 seconds
+    let reason;
+    // See http://tools.ietf.org/html/rfc6455#section-7.4.1
+    if (event.code === 1000)
+        reason = "Normal closure, meaning that the purpose for which the connection was established has been fulfilled.";
+    else if (event.code === 1001)
+        reason = "An endpoint is \"going away\", such as a server going down or a browser having navigated away from a page.";
+    else if (event.code === 1002)
+        reason = "An endpoint is terminating the connection due to a protocol error";
+    else if (event.code === 1003)
+        reason = "An endpoint is terminating the connection because it has received a type of data it cannot accept (e.g., an endpoint that understands only text data MAY send this if it receives a binary message).";
+    else if (event.code === 1004)
+        reason = "Reserved. The specific meaning might be defined in the future.";
+    else if (event.code === 1005)
+        reason = "No status code was actually present.";
+    else if (event.code === 1006)
+        reason = "The connection was closed abnormally, e.g., without sending or receiving a Close control frame";
+    else if (event.code === 1007)
+        reason = "An endpoint is terminating the connection because it has received data within a message that was not consistent with the type of the message (e.g., non-UTF-8 [http://tools.ietf.org/html/rfc3629] data within a text message).";
+    else if (event.code === 1008)
+        reason = "An endpoint is terminating the connection because it has received a message that \"violates its policy\". This reason is given either if there is no other sutible reason, or if there is a need to hide specific details about the policy.";
+    else if (event.code === 1009)
+        reason = "An endpoint is terminating the connection because it has received a message that is too big for it to process.";
+    else if (event.code === 1010) // Note that this status code is not used by the server, because it can fail the WebSocket handshake instead.
+        reason = "An endpoint (client) is terminating the connection because it has expected the server to negotiate one or more extension, but the server didn't return them in the response message of the WebSocket handshake. <br /> Specifically, the extensions that are needed are: " + event.reason;
+    else if (event.code === 1011)
+        reason = "A server is terminating the connection because it encountered an unexpected condition that prevented it from fulfilling the request.";
+    else if (event.code === 1015)
+        reason = "The connection was closed due to a failure to perform a TLS handshake (e.g., the server certificate can't be verified).";
+    else
+        reason = "Unknown reason";
+    console.error('ws:', reason);
+    console.error('ws:', event);
 
-    ws.onclose = function (event) {
-        // Try to reconnect in 5 seconds
-        let reason;
-        // See http://tools.ietf.org/html/rfc6455#section-7.4.1
-        if (event.code === 1000)
-            reason = "Normal closure, meaning that the purpose for which the connection was established has been fulfilled.";
-        else if (event.code === 1001)
-            reason = "An endpoint is \"going away\", such as a server going down or a browser having navigated away from a page.";
-        else if (event.code === 1002)
-            reason = "An endpoint is terminating the connection due to a protocol error";
-        else if (event.code === 1003)
-            reason = "An endpoint is terminating the connection because it has received a type of data it cannot accept (e.g., an endpoint that understands only text data MAY send this if it receives a binary message).";
-        else if (event.code === 1004)
-            reason = "Reserved. The specific meaning might be defined in the future.";
-        else if (event.code === 1005)
-            reason = "No status code was actually present.";
-        else if (event.code === 1006)
-            reason = "The connection was closed abnormally, e.g., without sending or receiving a Close control frame";
-        else if (event.code === 1007)
-            reason = "An endpoint is terminating the connection because it has received data within a message that was not consistent with the type of the message (e.g., non-UTF-8 [http://tools.ietf.org/html/rfc3629] data within a text message).";
-        else if (event.code === 1008)
-            reason = "An endpoint is terminating the connection because it has received a message that \"violates its policy\". This reason is given either if there is no other sutible reason, or if there is a need to hide specific details about the policy.";
-        else if (event.code === 1009)
-            reason = "An endpoint is terminating the connection because it has received a message that is too big for it to process.";
-        else if (event.code === 1010) // Note that this status code is not used by the server, because it can fail the WebSocket handshake instead.
-            reason = "An endpoint (client) is terminating the connection because it has expected the server to negotiate one or more extension, but the server didn't return them in the response message of the WebSocket handshake. <br /> Specifically, the extensions that are needed are: " + event.reason;
-        else if (event.code === 1011)
-            reason = "A server is terminating the connection because it encountered an unexpected condition that prevented it from fulfilling the request.";
-        else if (event.code === 1015)
-            reason = "The connection was closed due to a failure to perform a TLS handshake (e.g., the server certificate can't be verified).";
-        else
-            reason = "Unknown reason";
-        console.error('ws:', reason);
-        console.error('ws:', event);
+    setTimeout(function () {
+        ws = new WebSocket('ws://localhost:12034/?stream=live&stream_name=' + stream_name);
+        ws.onmessage = function (evt) {
+            if (typeof evt.data === 'string' && evt.data === 'start')
+                mediaRecorder.start(100);
+        };
+    }, 2000);
+};
+ws.binaryType = "arraybuffer";
 
-        setTimeout(function () {
-            start(websocketServerLocation)
-        }, 5000);
-    };
-    ws.binaryType = "arraybuffer";
+function start() {
     var websocket2 = new WebSocket('ws://localhost:12034/?stream=get');
     websocket2.binaryType = "arraybuffer";
     websocket2.onopen = function () {
@@ -137,11 +142,11 @@ function start(websocketServerLocation) {
                 play = true;
 
                 setTimeout(function () {
-                    video.currentTime = 86400*2;
+                    video.currentTime = 86400 * 2;
                     setTimeout(function () {
-                        video.currentTime = 86400*3;
+                        video.currentTime = 86400 * 3;
                         setTimeout(function () {
-                            video.currentTime = 86400*4
+                            video.currentTime = 86400 * 4
 
                         }, 400);
                     }, 800);
@@ -217,7 +222,11 @@ function handleError(error) {
     console.log('navigator.getUserMedia error: ', error);
 }
 
-navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
+if (!getAllUrlParams().stream_name) {
+    navigator.mediaDevices.getUserMedia(constraints).then(handleSuccess).catch(handleError);
+} else {
+    console.warn('SEE stream getAllUrlParams().stream_name:', getAllUrlParams().stream_name)
+}
 
 function handleSourceOpen(event) {
     console.log('MediaSource opened');
@@ -237,13 +246,19 @@ function handleStop(event) {
     console.log('Recorder stopped: ', event);
 }
 
-function toggleRecording() {
-    if (recordButton.textContent === 'Start test') {
-        startRecording();
-    } else {
-        stopRecording();
-        recordButton.textContent = 'Start test';
+if (getAllUrlParams().stream_name) {
+    recordButton.textContent = 'SEE STREAM' + getAllUrlParams().stream_name;
+}
 
+function toggleRecording() {
+    if (!getAllUrlParams().stream_name) {
+        if (recordButton.textContent === 'Start test') {
+            startRecording();
+        } else {
+            stopRecording();
+            recordButton.textContent = 'Start test';
+
+        }
     }
 }
 
