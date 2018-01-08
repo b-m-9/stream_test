@@ -1,0 +1,20 @@
+{
+  "name": "demortc",
+  "version": "1.0.0",
+  "description": "",
+  "main": "node.js",
+  "dependencies": {
+    "aws-sdk": "^2.176.0",
+    "bluebird": "^3.5.1",
+    "fluent-ffmpeg": "^2.1.2",
+    "is-json-promise": "^1.0.7",
+    "node-static": "^0.7.10",
+    "stream": "0.0.2",
+    "websocket": "^1.0.25"
+  },
+  "scripts": {
+    "run": "node ./ws-stream/index.js",
+  },
+  "author": "Bogdan Medvedev",
+  "license": "ISC"
+}
