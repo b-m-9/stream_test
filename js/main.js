@@ -77,11 +77,10 @@ var recordedBlobs = [];
 var waitStream = true;
 var play = false;
 var sourceBuffer;
-var stream_name = (new Date()).getTime();
 ws = new WebSocket('ws://localhost:12034/?stream=live&stream_name=' + stream_name);
 ws.onmessage = function (evt) {
     if (typeof evt.data === 'string' && evt.data === 'start')
-        mediaRecorder.start(100);
+        mediaRecorder.start(10);
 };
 
 ws.onclose = function (event) {
@@ -123,14 +122,14 @@ ws.onclose = function (event) {
         ws = new WebSocket('ws://localhost:12034/?stream=live&stream_name=' + stream_name);
         ws.onmessage = function (evt) {
             if (typeof evt.data === 'string' && evt.data === 'start')
-                mediaRecorder.start(100);
+                mediaRecorder.start(10);
         };
     }, 2000);
 };
 ws.binaryType = "arraybuffer";
 
 function start() {
-    var websocket2 = new WebSocket('ws://localhost:12034/?stream=get');
+    var websocket2 = new WebSocket('ws://localhost:12034/?stream=get&stream_name=' + stream_name);
     websocket2.binaryType = "arraybuffer";
     websocket2.onopen = function () {
         websocket2.send(JSON.stringify({method: "getmeta", reqid: (new Date()).getTime()}));

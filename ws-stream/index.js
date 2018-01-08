@@ -110,8 +110,8 @@ class VideoStreem {
                         .then((data) => {
                             switch (data.method) {
                                 case "getmeta":
-                                    if (this.first_binnary.hasOwnProperty(_client.recived_stream)) {
-                                        _client.ws.sendBytes(this.first_binnary[_client.recived_stream]);
+                                    if (this.first_binnary.hasOwnProperty(_client.param_connect.stream_name) && this.first_binnary[_client.param_connect.stream_name].hasOwnProperty(_client.recived_stream)) {
+                                        _client.ws.sendBytes(this.first_binnary[_client.param_connect.stream_name][_client.recived_stream]);
                                         _client.recived_stream++;
                                     } else {
                                         _client.ws.send(JSON.stringify({
@@ -151,7 +151,7 @@ class VideoStreem {
                         _client.file.write(message.binaryData); //write to file data
                 }
                 for (let index in this.clients) {
-                    if (this.clients.hasOwnProperty(index) && this.clients[index] !== _client && this.clients[index].param_connect.stream === 'get') { // steam=get waiting data
+                    if (this.clients.hasOwnProperty(index) && this.clients[index] !== _client && this.clients[index].param_connect.stream === 'get' && this.clients[index].param_connect.stream_name === _client.param_connect.stream_name) { // steam=get waiting data
                         if (message.type === 'binary') {
                             this.clients[index].ws.sendBytes(message.binaryData); // send binary video data
                             this.clients[index].recived_stream++;

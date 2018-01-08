@@ -22,11 +22,11 @@
       <file leaf-file-name="index.html" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/index.html">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="632">
-              <caret line="84" column="98" lean-forward="false" selection-start-line="84" selection-start-column="98" selection-end-line="84" selection-end-column="98" />
+            <state relative-caret-position="491">
+              <caret line="85" column="8" lean-forward="false" selection-start-line="85" selection-start-column="8" selection-end-line="85" selection-end-column="8" />
               <folding>
+                <element signature="n#style#0;n#a#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
                 <element signature="n#style#0;n#video#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-                <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
               </folding>
             </state>
           </provider>
@@ -35,8 +35,8 @@
       <file leaf-file-name="main.js" pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/js/main.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="279">
-              <caret line="250" column="1" lean-forward="true" selection-start-line="250" selection-start-column="1" selection-end-line="250" selection-end-column="1" />
+            <state relative-caret-position="520">
+              <caret line="134" column="86" lean-forward="false" selection-start-line="134" selection-start-column="86" selection-end-line="134" selection-end-column="86" />
               <folding />
             </state>
           </provider>
@@ -45,10 +45,10 @@
       <file leaf-file-name="index.js" pinned="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/ws-stream/index.js">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="430">
-              <caret line="92" column="72" lean-forward="false" selection-start-line="92" selection-start-column="61" selection-end-line="92" selection-end-column="72" />
+            <state relative-caret-position="-1111">
+              <caret line="111" column="47" lean-forward="false" selection-start-line="111" selection-start-column="47" selection-end-line="111" selection-end-column="47" />
               <folding>
-                <marker date="1515448630000" expanded="true" signature="9714:9864" ph="..." />
+                <marker date="1515452993000" expanded="true" signature="9943:10093" ph="..." />
               </folding>
             </state>
           </provider>
@@ -75,8 +75,6 @@
   </component>
   <component name="FindInProjectRecents">
     <findStrings>
-      <find>recordedBlobs</find>
-      <find>duration</find>
       <find>Infinity</find>
       <find>mediaSource_1</find>
       <find>live</find>
@@ -105,6 +103,8 @@
       <find>get</find>
       <find>start</find>
       <find>video.pla</find>
+      <find>media</find>
+      <find>stream_name</find>
     </findStrings>
   </component>
   <component name="Git.Settings">
@@ -327,12 +327,20 @@
       <workItem from="1515314495578" duration="6362000" />
       <workItem from="1515392463102" duration="3433000" />
       <workItem from="1515434722376" duration="594000" />
-      <workItem from="1515437789005" duration="5033000" />
+      <workItem from="1515437789005" duration="6100000" />
     </task>
+    <task id="LOCAL-00001" summary="fix">
+      <created>1515452265586</created>
+      <option name="number" value="00001" />
+      <option name="presentableId" value="LOCAL-00001" />
+      <option name="project" value="LOCAL" />
+      <updated>1515452265586</updated>
+    </task>
+    <option name="localTasksCounter" value="2" />
     <servers />
   </component>
   <component name="TimeTrackingManager">
-    <option name="totallyTimeSpent" value="107033000" />
+    <option name="totallyTimeSpent" value="108100000" />
   </component>
   <component name="ToolWindowManager">
     <frame x="0" y="0" width="1920" height="1200" extended-state="0" />
@@ -363,6 +371,10 @@
   </component>
   <component name="VcsContentAnnotationSettings">
     <option name="myLimit" value="2678400000" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="fix" />
+    <option name="LAST_COMMIT_MESSAGE" value="fix" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager />
@@ -613,29 +625,29 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/ws-stream/index.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="430">
-          <caret line="92" column="72" lean-forward="false" selection-start-line="92" selection-start-column="61" selection-end-line="92" selection-end-column="72" />
+        <state relative-caret-position="-1111">
+          <caret line="111" column="47" lean-forward="false" selection-start-line="111" selection-start-column="47" selection-end-line="111" selection-end-column="47" />
           <folding>
-            <marker date="1515448630000" expanded="true" signature="9714:9864" ph="..." />
+            <marker date="1515452993000" expanded="true" signature="9943:10093" ph="..." />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/index.html">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="632">
-          <caret line="84" column="98" lean-forward="false" selection-start-line="84" selection-start-column="98" selection-end-line="84" selection-end-column="98" />
+        <state relative-caret-position="491">
+          <caret line="85" column="8" lean-forward="false" selection-start-line="85" selection-start-column="8" selection-end-line="85" selection-end-column="8" />
           <folding>
+            <element signature="n#style#0;n#a#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
             <element signature="n#style#0;n#video#1;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
-            <element signature="n#style#0;n#div#0;n#div#0;n#body#0;n#html#0;n#!!top" expanded="true" />
           </folding>
         </state>
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/js/main.js">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="279">
-          <caret line="250" column="1" lean-forward="true" selection-start-line="250" selection-start-column="1" selection-end-line="250" selection-end-column="1" />
+        <state relative-caret-position="520">
+          <caret line="134" column="86" lean-forward="false" selection-start-line="134" selection-start-column="86" selection-end-line="134" selection-end-column="86" />
           <folding />
         </state>
       </provider>

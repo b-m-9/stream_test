@@ -8,12 +8,12 @@
 <body>
 
 <div id="container">
-
+    <a style="font-size: 16px;width: 100%;text-align: center;display: block;padding: 10px" id="link"></a>
     <video id="gum" autoplay muted style="width: 400px"></video>
 
     <video id="video" autoplay controls muted style="width: 400px;display: inline;background: #000000;height: 300px">
     </video>
-    <div style="font-size: 20px" id="link"></div>
+
 
     <button id="record">Start test</button>
 
@@ -81,7 +81,11 @@
         return obj;
     }
 
-    if (!getAllUrlParams().stream_name)
+    var stream_name = getAllUrlParams().stream_name || (new Date()).getTime();
+
+    if (getAllUrlParams().stream_name)
+        document.getElementById('link').innerHTML = location.href;
+    else
         document.getElementById('link').innerHTML = location.href + '&stream_name=' + stream_name;
 </script>
 <script src="js/main.js"></script>
