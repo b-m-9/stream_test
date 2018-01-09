@@ -26,6 +26,15 @@ video.addEventListener('loadedmetadata', () => {
         };
     }
 });
+var window_focus = true;
+
+window.onblur = function () {
+    window_focus = false;
+};
+window.onfocus = function () {
+    if (!window_focus) video.currentTime = 86400 * 4;
+    window_focus = true;
+};
 mediaSource_1.addEventListener('sourceopen', (e) => {
     console.log('sourceopen mediaSource_1');
     // mediaSource_1.duration = 0;
@@ -63,7 +72,6 @@ mediaSource_1.addEventListener('sourceopen', (e) => {
     });
 
     setTimeout(function () {
-
         start();
     }, 1000)
 
@@ -140,16 +148,16 @@ function start() {
             if (recordedBlobs.length > 40 && !play) {
                 play = true;
 
-                setTimeout(function () {
-                    video.currentTime = 86400 * 2;
-                    setTimeout(function () {
-                        video.currentTime = 86400 * 3;
-                        setTimeout(function () {
-                            video.currentTime = 86400 * 4
-
-                        }, 400);
-                    }, 800);
-                }, 300);
+                // setTimeout(function () {
+                //     video.currentTime = 86400 * 2;
+                //     setTimeout(function () {
+                //         video.currentTime = 86400 * 3;
+                //         setTimeout(function () {
+                //             video.currentTime = 86400 * 4
+                //
+                //         }, 400);
+                //     }, 800);
+                // }, 300);
             }
             recordedBlobs.push(event.data);
             if (buffer.updating || queue.length > 0) {
