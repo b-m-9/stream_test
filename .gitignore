@@ -1,2 +1,4 @@
-node_modules
-ws-stream/video_tmp
+.node_modules
+ws-stream/video_tmp/tmp_ready/
+ws-stream/video_tmp/tmp_stream/
+.idea
