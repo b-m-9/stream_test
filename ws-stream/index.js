@@ -43,7 +43,7 @@ class VideoStreem {
         this.debug = false;
         this.p = 360;
         this.fps = 30;
-        this.first_binnary = [];
+        this.first_binnary = {};
 
         this.app = http.createServer();
         this._webSocketServer = new WebSocketServer({
@@ -90,6 +90,7 @@ class VideoStreem {
                     }
                 }
                 else if (message.utf8Data === 'create_stream') {
+                    this.first_binnary[_client.param_connect.stream_name] = [];
                     if (!_client.file || _client.file.closed)
                         _client.filename = 'video-' + (new Date().getTime()) + '.webm';
                     _client.file = fs.createWriteStream(path.join(__dirname, './video_tmp/tmp_stream/' + _client.filename));  //create stream file (video)
@@ -109,8 +110,8 @@ class VideoStreem {
                         .then((data) => {
                             switch (data.method) {
                                 case "getmeta":
-                                    if (this.first_binnary.hasOwnProperty(_client.recived_stream)) {
-                                        _client.ws.sendBytes(this.first_binnary[_client.recived_stream]);
+                                    if (this.first_binnary.hasOwnProperty(_client.param_connect.stream_name) && this.first_binnary[_client.param_connect.stream_name].hasOwnProperty(_client.recived_stream)) {
+                                        _client.ws.sendBytes(this.first_binnary[_client.param_connect.stream_name][_client.recived_stream]);
                                         _client.recived_stream++;
                                     } else {
                                         _client.ws.send(JSON.stringify({
@@ -143,13 +144,14 @@ class VideoStreem {
                 // this.clients[index].ws.sendUTF(message.utf8Data);
             }
             if (_client.param_connect.stream === 'live') {
+                if(!this.first_binnary[_client.param_connect.stream_name]) this.first_binnary[_client.param_connect.stream_name] = [];
                 if (message.type === 'binary') {
-                    if (this.first_binnary.length < 5) this.first_binnary.push(message.binaryData);
+                    if (this.first_binnary[_client.param_connect.stream_name].length < 5) this.first_binnary[_client.param_connect.stream_name].push(message.binaryData);
                     if (_client.file && !_client.file.closed)
                         _client.file.write(message.binaryData); //write to file data
                 }
                 for (let index in this.clients) {
-                    if (this.clients.hasOwnProperty(index) && this.clients[index] !== _client && this.clients[index].param_connect.stream === 'get') { // steam=get waiting data
+                    if (this.clients.hasOwnProperty(index) && this.clients[index] !== _client && this.clients[index].param_connect.stream === 'get' && this.clients[index].param_connect.stream_name === _client.param_connect.stream_name) { // steam=get waiting data
                         if (message.type === 'binary') {
                             this.clients[index].ws.sendBytes(message.binaryData); // send binary video data
                             this.clients[index].recived_stream++;
@@ -206,7 +208,7 @@ class VideoStreem {
                     if (this.debug) console.log(_dt, 'renderVideo end:', opt.filename, ((new Date().getTime()) - st) + 'ms');
                 })
                 .save(path.join(__dirname, './video_tmp/tmp_ready/ready-' + (opt.filename.replace('webm', 'webm'))));
-        }).timeout(1000 * 60 * 10, 'render video timeout'); // 10 min timeout
+        }).timeout(1000 * 60 * 20, 'render video timeout'); // 20 min timeout
     }
 
     unlinkFile(opt) {
