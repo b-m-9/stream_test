@@ -26,14 +26,21 @@ video.addEventListener('loadedmetadata', () => {
         };
     }
 });
+
 mediaSource_1.addEventListener('sourceopen', (e) => {
     console.log('sourceopen mediaSource_1');
     // mediaSource_1.duration = 0;
     buffer = mediaSource_1.addSourceBuffer('video/webm; codecs="opus, vp9"');
+    buffer.mode = 'sequence';
 
     buffer.onupdateend = function () { // Note: Have tried 'updateend'
-        if (queue.length > 0 && !buffer.updating) {
+        while (queue.length > 0) {
+          if (!buffer.updating) {
             buffer.appendBuffer(queue.shift());
+          } else {
+            video.currentTime = 1e9;
+            break;
+          }
         }
         console.log('updateend');
     };
@@ -43,11 +50,8 @@ mediaSource_1.addEventListener('sourceopen', (e) => {
     buffer.addEventListener('sourceended', function (_) {
         console.log('sourceclose');
     });
-    // buffer.addEventListener('updateend', function (_) {
-    //
-    // });
     buffer.addEventListener('error', function (error) {
-        console.log('error', error);
+      console.log('error', error.error);
     });
     mediaSource_1.addEventListener('sourceclose', function (_) {
         console.log('mediaSource_1 sourceclose');
@@ -58,15 +62,11 @@ mediaSource_1.addEventListener('sourceopen', (e) => {
     mediaSource_1.addEventListener('error', function (error) {
         console.log('mediaSource_1 error', error);
     });
+
     mediaSource_1.addEventListener('updateend', function (_) {
         console.log('mediaSource_1 updateend');
     });
-
-    setTimeout(function () {
-
-        start();
-    }, 1000)
-
+    start();
 }, false);
 
 
@@ -78,9 +78,11 @@ var waitStream = true;
 var play = false;
 var sourceBuffer;
 ws = new WebSocket('ws://localhost:12034/?stream=live&stream_name=' + stream_name);
+
 ws.onmessage = function (evt) {
-    if (typeof evt.data === 'string' && evt.data === 'start')
-        mediaRecorder.start(10);
+    if (typeof evt.data === 'string' && evt.data === 'start') {
+      mediaRecorder.start(10);
+    }
 };
 
 ws.onclose = function (event) {
@@ -128,6 +130,7 @@ ws.onclose = function (event) {
 };
 ws.binaryType = "arraybuffer";
 
+
 function start() {
     var websocket2 = new WebSocket('ws://localhost:12034/?stream=get&stream_name=' + stream_name);
     websocket2.binaryType = "arraybuffer";
@@ -139,23 +142,20 @@ function start() {
         if (typeof event.data !== 'string') {
             if (recordedBlobs.length > 40 && !play) {
                 play = true;
-
-                setTimeout(function () {
-                    video.currentTime = 86400 * 2;
-                    setTimeout(function () {
-                        video.currentTime = 86400 * 3;
-                        setTimeout(function () {
-                            video.currentTime = 86400 * 4
-
-                        }, 400);
-                    }, 800);
-                }, 300);
+                video.currentTime = 1e9;
             }
             recordedBlobs.push(event.data);
             if (buffer.updating || queue.length > 0) {
                 queue.push(event.data);
             } else {
+              try {
                 buffer.appendBuffer(event.data);
+              } catch (e) {
+                if (video.error.code === 3) {
+                  play = true;
+                  video.currentTime = 1e9;
+                }
+              }
             }
 
             if (waitStream) websocket2.send(JSON.stringify({
@@ -261,8 +261,17 @@ function toggleRecording() {
     }
 }
 
-function startRecording() {
+function getStream () {
+  return new Promise((resolve, reject) => {
+    if (ws.readyState === ws.OPEN) {
+      resolve(ws);
+    } else if (ws.readyState === ws.CLOSING || ws.readyState == ws.CLOSED) {
+      reject(null);
+    }
+  });
+}
 
+function startRecording() {
     var options = {mimeType: 'video/webm; codecs="opus, vp9"'};
     if (!MediaRecorder.isTypeSupported(options.mimeType)) {
         console.log(options.mimeType + ' is not Supported');
@@ -275,8 +284,7 @@ function startRecording() {
                 options = {mimeType: ''};
             }
         }
-    }
-    try {
+    } try {
         mediaRecorder = new MediaRecorder(window.stream, options);
     } catch (e) {
         console.error('Exception while creating MediaRecorder: ' + e);
@@ -289,8 +297,11 @@ function startRecording() {
 
     mediaRecorder.onstop = handleStop;
     mediaRecorder.ondataavailable = handleDataAvailable;
-    ws.send('create_stream');
-
+    getStream()
+      .then(ws => {
+        ws.send('create_stream');
+      })
+      .catch(() => console.log('create_stream failed'));
     console.log('MediaRecorder started', mediaRecorder);
 }
 
