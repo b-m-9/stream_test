@@ -48,7 +48,7 @@ if (!stream_name) {
 if (getAllUrlParams().stream_name)
     document.getElementById('link').innerHTML = location.href;
 else
-    document.getElementById('link').innerHTML = location.href + '&stream_name=' + stream_name;
+    document.getElementById('link').innerHTML = location.href + '?stream_name=' + stream_name;
 
 // --------------- GUM WEBSOCKET ----------------
 var ws;
@@ -200,10 +200,10 @@ function stopRecording() {
         mediaRecorder.stop();
         getStream()
             .then(ws => {
-                ws.send('end_stream');
-                console.log('end_stream sent');
+                ws.send('close_stream');
+                console.log('close_stream sent');
             })
-            .catch(() => console.log('end_stream failed'));
+            .catch(() => console.log('close_stream failed'));
     }
 }
 
@@ -221,48 +221,57 @@ video.addEventListener('loadedmetadata', function (event) {
     console.log('----- loadedmetadata');
 });
 
-video.addEventListener('canplay', function (event) {
-    console.log('Playback can begin');
-    video.play()
-        .then(() => {
-            console.log('Playback has started');
-        })
-        .catch((e) => {
-            console.log('Playback can\'t start', e)
-        });
+
+function play(event) {
+  console.log('Playback can start');
+  video.play()
+  .then(() => {
+    console.log('Playback has started');
+  })
+  .catch((e) => {
+    console.log('Playback can\'t start', e)
+  });
+}
+
+video.addEventListener('canplay', play);
+video.addEventListener('canplaythrough', play);
+video.addEventListener('loadeddata', play);
+
+video.addEventListener('waiting', function (event) {
+  console.log('Waiting for network data');
 });
 
-video.addEventListener('readystatechange', function (event) {
-    switch (video.readyState) {
-        case video.HAVE_ENOUGH_DATA:
-            video.currentTime = 1e9;
-            video.play();
-            break;
-        case video.HAVE_NOTHING:
-        case video.HAVE_METADATA:
-        case video.HAVE_CURRENT_DATA:
-            video.currentTime = 1e9;
-        default:
-            video.pause();
-    }
-
-    console.log('Playback can begin');
-    video.play()
-        .then(() => {
-            console.log('Playback has started');
-        })
-        .catch((e) => {
-            console.log('Playback can\'t start', e)
-        });
+video.addEventListener('emptied', function (event) {
+  console.log('Video emptied');
 });
+
+video.addEventListener('suspend', function (event) {
+  console.log('Video suspended');
+});
+
+video.addEventListener('stalled', function (event) {
+  console.log('Video stalled');
+});
+
+video.addEventListener('ended', function (event) {
+  console.log('Video ended');
+});
+
+video.addEventListener('error', function (event) {
+  console.log(video.error);
+});
+
 
 mediaSource_1.onsourceopen = function (event) {
     console.log('Playback media source opened');
     try {
-        buffer = mediaSource_1.addSourceBuffer('video/webm; codecs="opus, vp9"');
+        if (!buffer) {
+          buffer = mediaSource_1.addSourceBuffer('video/webm; codecs="opus, vp9"');
+          buffer.mode = 'sequence';
+        }
 
         buffer.onupdateend = function (event) {
-            console.log('Chunks in buffer: ', segments.length);
+            console.log('Update ended');
             if (segments.length > 0) {
                 try {
                     buffer.appendBuffer(segments.shift());
@@ -312,7 +321,6 @@ function start() {
 
     playbackWebsocket.onmessage = function (event) {
         if (typeof event.data !== 'string') {
-            console.log('Chunk received',);
             try {
                 if (segments.length === 0) {
                     buffer.appendBuffer(event.data);
@@ -343,119 +351,4 @@ function start() {
             }
         }
     };
-
-    /*
-    function start() {
-        websocket2.onmessage = function (event) {
-              if (!buffer.updating) {
-                buffer.appendBuffer(event.data);
-              }
-
-                // if (recordedBlobs.length > 40 && !play) {
-                //     play = true;
-                //     video.currentTime = 1e9;
-                // }
-                // recordedBlobs.push(event.data);
-                // if (buffer.updating || queue.length > 0) {
-                //     queue.push(event.data);
-                // } else {
-                //   try {
-                //     buffer.appendBuffer(event.data);
-                //   } catch (e) {
-                //     if (video.error.code === 3) {
-                //       play = true;
-                //       video.currentTime = 1e9;
-                //     }
-                //   }
-                // }
-
-            } else {
-            }
-        };
-
-    */
 }
-
-
-/*
-// var channel = 'can01'; // Unused
-var queue = [];
-// var canvas = document.querySelector('canvas'); // Unused
-
-mediaSource_1.addEventListener('sourceopen', (e) => {
-    console.log('sourceopen mediaSource_1');
-    // mediaSource_1.duration = 0;
-    buffer = mediaSource_1.addSourceBuffer('video/webm; codecs="opus, vp9"');
-
-    buffer.onupdate = function () {
-    };
-
-    // buffer.onupdateend = function () { // Note: Have tried 'updateend'
-    //     while (queue.length > 0) {
-    //       if (!buffer.updating) {
-    //         buffer.appendBuffer(queue.shift());
-    //       } else {
-    //         video.currentTime = 1e9;
-    //         break;
-    //       }
-    //     }
-    //     // console.log('updateend');
-    // };
-    buffer.addEventListener('sourceclose', function (_) {
-        console.log('sourceclose');
-    });
-    buffer.addEventListener('sourceended', function (_) {
-        console.log('sourceclose');
-    });
-    buffer.addEventListener('error', function (error) {
-      console.log('error', error.error);
-    });
-    mediaSource_1.addEventListener('error', function (error) {
-        console.log('mediaSource_1 error', error);
-    });
-    mediaSource_1.addEventListener('updateend', function (_) {
-        console.log('mediaSource_1 updateend');
-    });
-    start();
-}, false);
-
-var mediaSource = new MediaSource();
-mediaSource.addEventListener('sourceopen', handleSourceOpen, false);
-var recordedBlobs = [];
-var waitStream = true;
-var play = false;
-var sourceBuffer;
-
-
-
-
-}
-
-// websocket.onopen = function () {
-//     websocket.push(JSON.stringify({
-//         open: true,
-//         channel: channel
-//     }));
-// };
-// websocket.push = ws.send;
-var ff = null;
-
-
-
-
-
-function handleSourceOpen(event) {
-    console.log('MediaSource opened');
-    sourceBuffer = mediaSource.addSourceBuffer('video/webm; codecs="opus, vp9"');
-    console.log('Source buffer: ', sourceBuffer);
-}
-
-
-
-
-
-
-
-
-
-*/
